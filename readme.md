@@ -1,5 +1,14 @@
 # ERPNext Priority Engine
+## Summary
+Implemented a Priority Engine for ERPNext that analyzes overdue invoices
+and returns a prioritized list based on business impact.
 
+## Key Features
+- Priority calculation (HIGH / MEDIUM / LOW)
+- API filtering with query parameters
+- Unit & Integration tests
+- Mocked ERP client
+- CI with GitHub Actions
 ## Problem
 ERP systems contain many operational issues such as overdue invoices and blocked cash flow.
 Managers and accountants often don’t know **what to fix first**.
@@ -22,6 +31,11 @@ a prioritized list based on business impact and clear priority rules.
 ## API Endpoints
 **GET /priority/issues**  
 Returns a prioritized list of overdue invoices.
+## Testing & Coverage
+- Unit tests for business logic (priority calculation & sorting)
+- Integration tests for API endpoints using FastAPI TestClient
+- External ERP client mocked in integration tests
+- Test coverage: 98% (pytest-cov)
 
 ## Example Response
 ```json
@@ -37,3 +51,8 @@ Returns a prioritized list of overdue invoices.
     }
   ]
 }
+
+
+
+
+
