@@ -1,5 +1,15 @@
 from fastapi.testclient import TestClient
 from app.main import app
+from unittest.mock import patch
+from app.models.priority_models import Invoice
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+
+
+@pytest.fixture
+def client():
+    return TestClient(app)
 
 client = TestClient(app)
 
@@ -85,3 +95,23 @@ def test_priority_issues_with_min_amount():
     for issue in data["top_issues"]:
         assert issue["amount"] >= 50000
 
+def test_priority_issues_with_mocked_client(client):
+    invoices = [
+        Invoice(
+            invoice_id="INV-100",
+            customer="Mock Corp",
+            amount=90000,
+            days_overdue=60
+        )
+    ]
+
+    with patch(
+        "app.clients.erpnext_client.ERPNextClient.fetch_overdue_invoices",
+        return_value=invoices
+    ):
+        response = client.get("/priority/issues")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["top_issues"]) == 1
+        assert data["top_issues"][0]["priority"] == "HIGH"
