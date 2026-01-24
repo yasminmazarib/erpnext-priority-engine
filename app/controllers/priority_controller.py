@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query
 from app.services.priority_service import PriorityService
 
 router = APIRouter()
@@ -6,22 +6,23 @@ router = APIRouter()
 
 @router.get("/priority/issues")
 def get_priority_issues(
-    limit: int = Query(5, ge=1, le=20),
-    min_days: int = Query(1, ge=0),
-    min_amount: float = Query(0, ge=0)
+    limit: int = Query(5, gt=0, description="Max number of issues to return"),
+    min_days: int = Query(1, ge=0, description="Minimum days overdue"),
+    min_amount: float = Query(0, ge=0, description="Minimum invoice amount"),
 ):
-    results = PriorityService.get_priority_issues(
+    issues = PriorityService.get_priority_issues(
         limit=limit,
         min_days=min_days,
-        min_amount=min_amount
+        min_amount=min_amount,
     )
 
-    if not results:
+    if not issues:
         return {
-            "message": "No priority issues found for the given filters",
-            "top_issues": []
+            "top_issues": [],
+            "message": "No priority issues found for given filters",
         }
 
     return {
-        "top_issues": [r.to_dict() for r in results]
+        "top_issues": [i.to_dict() for i in issues]
     }
+

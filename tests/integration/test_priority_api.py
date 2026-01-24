@@ -60,4 +60,28 @@ def test_invalid_limit():
     response = client.get("/priority/issues?limit=0")
 
     assert response.status_code == 422
+def test_priority_issues_with_limit():
+    response = client.get("/priority/issues?limit=2")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data["top_issues"]) == 2
+
+
+def test_priority_issues_with_min_days():
+    response = client.get("/priority/issues?min_days=30")
+    assert response.status_code == 200
+
+    data = response.json()
+    for issue in data["top_issues"]:
+        assert issue["days_overdue"] >= 30
+
+
+def test_priority_issues_with_min_amount():
+    response = client.get("/priority/issues?min_amount=50000")
+    assert response.status_code == 200
+
+    data = response.json()
+    for issue in data["top_issues"]:
+        assert issue["amount"] >= 50000
 
