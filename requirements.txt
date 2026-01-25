@@ -8,3 +8,5 @@ anyio
 pydantic
 
 python-dotenv
+
+requests
