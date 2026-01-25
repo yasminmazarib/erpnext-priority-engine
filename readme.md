@@ -37,6 +37,15 @@ Returns a prioritized list of overdue invoices.
 - External ERP client mocked in integration tests
 - Test coverage: 98% (pytest-cov)
 
+## Setup & Run
+
+```bash
+python -m venv .venv
+source .venv/Scripts/activate   # Windows Git Bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+
 ## Example Response
 ```json
 {

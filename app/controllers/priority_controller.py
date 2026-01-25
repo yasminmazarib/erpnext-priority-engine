@@ -1,7 +1,36 @@
 from fastapi import APIRouter, Query
 from app.services.priority_service import PriorityService
+from app.clients.erpnext_client import ERPNextClient
 
 router = APIRouter()
+erpnext_client = ERPNextClient()
+
+
+@router.get("/priority/invoices")
+def get_overdue_invoices():
+    """Fetch overdue invoices from ERPNext."""
+    invoices = erpnext_client.get_overdue_invoices()
+    
+    if not invoices:
+        return {
+            "invoices": [],
+            "count": 0,
+            "message": "No overdue invoices found"
+        }
+    
+    return {
+        "invoices": [
+            {
+                "invoice_id": inv.invoice_id,
+                "customer": inv.customer,
+                "amount": inv.amount,
+                "days_overdue": inv.days_overdue,
+                "due_date": inv.due_date.isoformat() if inv.due_date else None
+            }
+            for inv in invoices
+        ],
+        "count": len(invoices)
+    }
 
 
 @router.get("/priority/issues")

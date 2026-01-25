@@ -3,3 +3,8 @@ uvicorn
 pytest
 anyio
 httpx
+
+anyio
+pydantic
+
+python-dotenv
