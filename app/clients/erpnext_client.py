@@ -72,7 +72,11 @@ class ERPNextClient:
         
         response = requests.get(url, headers=self.headers, params=params)
         response.raise_for_status()
-        
+
+    def fetch_overdue_invoices(self) -> List[Invoice]:
+        """Alias for compatibility with services and tests."""
+        return self.get_overdue_invoices()
+
         invoices = []
         for inv in response.json()["data"]:
             invoices.append(
