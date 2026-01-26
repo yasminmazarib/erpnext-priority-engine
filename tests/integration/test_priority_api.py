@@ -106,9 +106,9 @@ def test_priority_issues_with_mocked_client(client):
     ]
 
     with patch(
-        "app.clients.erpnext_client.ERPNextClient.fetch_overdue_invoices",
-        return_value=invoices
-    ):
+    "app.clients.erpnext_client.ERPNextClient.get_overdue_invoices",
+    return_value=invoices
+):
         response = client.get("/priority/issues")
 
         assert response.status_code == 200

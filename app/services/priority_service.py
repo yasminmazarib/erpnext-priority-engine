@@ -49,7 +49,7 @@ class PriorityService:
             raise ValueError("limit must be greater than zero")
 
         client = ERPNextClient()
-        invoices = client.fetch_overdue_invoices()
+        invoices = client.get_overdue_invoices()
 
         filtered = [
             inv for inv in invoices

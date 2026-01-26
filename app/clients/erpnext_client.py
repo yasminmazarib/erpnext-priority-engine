@@ -3,7 +3,7 @@ import json
 import requests
 from datetime import datetime, date
 from dotenv import load_dotenv
-from typing import List
+from typing import List, Optional
 from app.models.priority_models import Invoice
 
 load_dotenv()
@@ -17,62 +17,131 @@ class ERPNextClient:
 
         self.headers = {
             "Authorization": f"token {self.api_key}:{self.api_secret}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
-    def fetch_overdue_invoices(self) -> List[Invoice]:
-        """
-        Fetch overdue invoices.
-        If ERPNext is not configured (CI / tests), return mock data.
-        """
-        # 🧪 CI / tests
+    # --------------------------------------------------
+    # Helper: calculate days overdue
+    # --------------------------------------------------
+    def _calculate_days_overdue(self, due_date_str: Optional[str]) -> int:
+        if not due_date_str:
+            return 0
+        try:
+            due = datetime.strptime(due_date_str, "%Y-%m-%d").date()
+            return max((date.today() - due).days, 0)
+        except Exception:
+            return 0
+
+    # --------------------------------------------------
+    # Get ALL sales invoices
+    # --------------------------------------------------
+    def get_sales_invoices(self) -> List[Invoice]:
         if not self.base_url:
-            return [
-                Invoice("INV-001", "Test Corp", 100000, 45),
-                Invoice("INV-002", "Demo Ltd", 50000, 30),
-                Invoice("INV-003", "Sample Inc", 75000, 60),
+            return []
+
+        url = f"{self.base_url}/api/resource/Sales%20Invoice"
+        params = {
+            "fields": json.dumps([
+                "name",
+                "customer",
+                "due_date",
+                "outstanding_amount",
+            ]),
+            "limit_page_length": 500,
+        }
+
+        try:
+            response = requests.get(url, headers=self.headers, params=params, timeout=10)
+            response.raise_for_status()
+
+            invoices: List[Invoice] = []
+
+            for inv in response.json().get("data", []):
+                due_date_str = inv.get("due_date")
+
+                invoices.append(
+                    Invoice(
+                        invoice_id=inv.get("name"),
+                        customer=inv.get("customer"),
+                        amount=inv.get("outstanding_amount", 0),
+                        days_overdue=self._calculate_days_overdue(due_date_str),
+                        due_date=datetime.strptime(due_date_str, "%Y-%m-%d").date()
+                        if due_date_str else None,
+                    )
+                )
+
+            return invoices
+
+        except Exception as e:
+            print(f"Error fetching sales invoices: {e}")
+            return []
+
+    # --------------------------------------------------
+    # Get OVERDUE invoices – sorted by PRIORITY then AMOUNT
+    # --------------------------------------------------
+    def get_overdue_invoices(self) -> List[Invoice]:
+        PRIORITY_ORDER = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
+
+        # 🔹 Mock data
+        if not self.base_url:
+            invoices = [
+                Invoice("INV-001", "Test Corp", 100000, 45, date.today()),
+                Invoice("INV-002", "Demo Ltd", 50000, 30, date.today()),
+                Invoice("INV-003", "Sample Inc", 75000, 60, date.today()),
             ]
 
-        # 🌐 Real ERPNext call
-        url = f"{self.base_url}/api/resource/Sales Invoice"
+            invoices.sort(
+                key=lambda x: (PRIORITY_ORDER[x.priority], x.amount),
+                reverse=True,
+            )
+            return invoices
+
+        url = f"{self.base_url}/api/resource/Sales%20Invoice"
         today = date.today().isoformat()
 
         params = {
             "filters": json.dumps([
                 ["docstatus", "=", 1],
                 ["outstanding_amount", ">", 0],
-                ["due_date", "<", today]
+                ["due_date", "<", today],
             ]),
             "fields": json.dumps([
                 "name",
                 "customer",
                 "due_date",
-                "outstanding_amount"
+                "outstanding_amount",
             ]),
-            "limit_page_length": 500
+            "limit_page_length": 500,
         }
 
-        response = requests.get(url, headers=self.headers, params=params)
-        response.raise_for_status()
+        try:
+            response = requests.get(url, headers=self.headers, params=params, timeout=10)
+            response.raise_for_status()
 
-        invoices = []
-        for inv in response.json().get("data", []):
-            invoices.append(
-                Invoice(
-                    invoice_id=inv["name"],
-                    customer=inv["customer"],
-                    amount=inv.get("outstanding_amount", 0),
-                    days_overdue=self._calculate_days_overdue(inv.get("due_date"))
+            invoices: List[Invoice] = []
+
+            for inv in response.json().get("data", []):
+                due_date_str = inv.get("due_date")
+
+                invoices.append(
+                    Invoice(
+                        invoice_id=inv.get("name"),
+                        customer=inv.get("customer"),
+                        amount=inv.get("outstanding_amount", 0),
+                        days_overdue=self._calculate_days_overdue(due_date_str),
+                        due_date=datetime.strptime(due_date_str, "%Y-%m-%d").date()
+                        if due_date_str else None,
+                    )
                 )
+
+            # 🔥 מיון חכם: קודם PRIORITY ואז סכום
+            invoices.sort(
+                key=lambda x: (PRIORITY_ORDER[x.priority], x.amount),
+                reverse=True,
             )
 
-        return invoices
+            return invoices
 
-    def _calculate_days_overdue(self, due_date: str) -> int:
-        if not due_date:
-            return 0
-        try:
-            due = datetime.strptime(due_date, "%Y-%m-%d").date()
-            return max((date.today() - due).days, 0)
-        except Exception:
-            return 0
+        except Exception as e:
+            print(f"Error fetching overdue invoices: {e}")
+            return []
