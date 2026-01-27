@@ -1,19 +1,18 @@
-import type { Metadata } from 'next';
-import './globals.css';
-
-export const metadata: Metadata = {
-  title: 'ERPNext Priority Engine',
-  description: 'Monitor and track overdue invoices',
-};
+import type { ReactNode } from "react";
+import "./globals.css";
+import Navigation from "@/components/Navigation";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50">{children}</body>
+      <body className="bg-gray-50">
+        <Navigation />
+        {children}
+      </body>
     </html>
   );
 }

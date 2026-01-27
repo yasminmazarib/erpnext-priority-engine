@@ -4,8 +4,10 @@ import requests
 from datetime import datetime, date
 from dotenv import load_dotenv
 from typing import List, Optional
+
 from app.models.priority_models import Invoice
 
+# טוען משתני סביבה מקובץ .env
 load_dotenv()
 
 
@@ -19,6 +21,9 @@ class ERPNextClient:
             "Authorization": f"token {self.api_key}:{self.api_secret}",
             "Content-Type": "application/json",
         }
+
+        # לוג בסיסי – עוזר להבין אם env נטען
+        print("ERPNext BASE URL:", self.base_url)
 
     # --------------------------------------------------
     # Helper: calculate days overdue
@@ -73,7 +78,7 @@ class ERPNextClient:
             return invoices
 
         except Exception as e:
-            print(f"Error fetching sales invoices: {e}")
+            print(f"❌ Error fetching sales invoices: {e}")
             return []
 
     # --------------------------------------------------
@@ -82,7 +87,6 @@ class ERPNextClient:
     def get_overdue_invoices(self) -> List[Invoice]:
         PRIORITY_ORDER = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
 
-        # 🔹 Mock data
         if not self.base_url:
             invoices = [
                 Invoice("INV-001", "Test Corp", 100000, 45, date.today()),
@@ -134,7 +138,6 @@ class ERPNextClient:
                     )
                 )
 
-            # 🔥 מיון חכם: קודם PRIORITY ואז סכום
             invoices.sort(
                 key=lambda x: (PRIORITY_ORDER[x.priority], x.amount),
                 reverse=True,
@@ -143,5 +146,46 @@ class ERPNextClient:
             return invoices
 
         except Exception as e:
-            print(f"Error fetching overdue invoices: {e}")
+            print(f"❌ Error fetching overdue invoices: {e}")
+            return []
+
+    # --------------------------------------------------
+    # Get Inventory Bins (Stock Snapshot) ✅ מתוקן סופית
+    # --------------------------------------------------
+    def get_bins(self):
+        if not self.base_url:
+            return []
+
+        url = f"{self.base_url}/api/resource/Bin"
+
+        params = {
+            # 🔥 כל השדות ש-InventoryService עלול להשתמש בהם
+            "fields": json.dumps([
+                "item_code",
+                "warehouse",
+                "actual_qty",
+                "reserved_qty",
+                "projected_qty",
+                "ordered_qty",
+                "indented_qty"
+            ]),
+            "limit_page_length": 500
+        }
+
+        try:
+            response = requests.get(
+                url,
+                headers=self.headers,
+                params=params,
+                timeout=10
+            )
+
+            print("ERPNext bins URL:", response.url)
+            print("status:", response.status_code)
+
+            response.raise_for_status()
+            return response.json().get("data", [])
+
+        except Exception as e:
+            print(f"❌ Error fetching inventory bins: {e}")
             return []
