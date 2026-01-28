@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { PriorityIssue } from '@/types';
+import { formatCurrency } from '@/lib/formatters';
 
 interface AmountChartProps {
   data: PriorityIssue[];
@@ -42,10 +43,10 @@ export default function AmountChart({ data }: AmountChartProps) {
           height={80}
         />
         <YAxis
-          label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft' }}
+          label={{ value: 'Amount (₪)', angle: -90, position: 'insideLeft' }}
         />
         <Tooltip
-          formatter={(value) => `$${value.toLocaleString('en-US')}`}
+          formatter={(value) => formatCurrency(value as number)}
           labelFormatter={(label) => `Customer: ${label}`}
         />
         <Legend />

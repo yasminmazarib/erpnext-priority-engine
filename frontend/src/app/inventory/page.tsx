@@ -81,7 +81,7 @@ export default function InventoryPage() {
                 <h2 className="text-xl font-semibold text-gray-900">
                   Summary
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
                     <p className="text-gray-600 text-sm">Total Issues</p>
                     <p className="text-3xl font-bold text-gray-900">
@@ -98,6 +98,12 @@ export default function InventoryPage() {
                     <p className="text-gray-600 text-sm">Medium Priority</p>
                     <p className="text-3xl font-bold text-yellow-600">
                       {issues.filter((i) => i.priority === 'MEDIUM').length}
+                    </p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                    <p className="text-gray-600 text-sm">Low Priority</p>
+                    <p className="text-3xl font-bold text-green-600">
+                      {issues.filter((i) => i.priority === 'LOW').length}
                     </p>
                   </div>
                 </div>

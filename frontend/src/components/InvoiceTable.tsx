@@ -1,6 +1,7 @@
 'use client';
 
 import { PriorityIssue } from '@/types';
+import { formatCurrency } from '@/lib/formatters';
 
 interface InvoiceTableProps {
   data: PriorityIssue[];
@@ -61,7 +62,7 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
               </td>
 
               <td className="px-6 py-4 text-right text-gray-700">
-                ${issue.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                {formatCurrency(issue.amount)}
               </td>
 
               <td className="px-6 py-4 text-right">

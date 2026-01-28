@@ -5,6 +5,7 @@ import FilterPanel from '@/components/FilterPanel';
 import InvoiceTable from '@/components/InvoiceTable';
 import AmountChart from '@/components/AmountChart';
 import { PriorityIssue, FilterParams } from '@/types';
+import { formatCurrency } from '@/lib/formatters';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -116,10 +117,9 @@ export default function DashboardPage() {
                   <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
                     <p className="text-gray-600 text-sm">Total Amount</p>
                     <p className="text-3xl font-bold text-gray-900">
-                      $
-                      {issues
-                        .reduce((sum, issue) => sum + issue.amount, 0)
-                        .toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                      {formatCurrency(
+                        issues.reduce((sum, issue) => sum + issue.amount, 0)
+                      )}
                     </p>
                   </div>
                 </div>
