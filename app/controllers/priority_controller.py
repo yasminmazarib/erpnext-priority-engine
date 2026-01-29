@@ -7,12 +7,16 @@ erpnext_client = ERPNextClient()
 
 
 # --------------------------------------------------
-# Overdue invoices with priority (HIGH / MEDIUM / LOW)
+# Overdue invoices (RAW data – WITHOUT priority logic)
 # --------------------------------------------------
 @router.get("/priority/invoices")
 def get_overdue_invoices(
     limit: int = Query(10, gt=0, description="Max number of invoices to return")
 ):
+    """
+    Return overdue invoices as raw data.
+    Priority is NOT calculated here.
+    """
     invoices = erpnext_client.get_overdue_invoices()
 
     if not invoices:
@@ -31,8 +35,7 @@ def get_overdue_invoices(
                 "customer": inv.customer,
                 "amount": inv.amount,
                 "days_overdue": inv.days_overdue,
-                "due_date": inv.due_date.isoformat() if inv.due_date else None,
-                "priority": inv.priority
+                "due_date": inv.due_date.isoformat() if inv.due_date else None
             }
             for inv in invoices
         ],
@@ -41,7 +44,7 @@ def get_overdue_invoices(
 
 
 # --------------------------------------------------
-# Priority issues (service-based logic)
+# Priority issues (BUSINESS LOGIC via PriorityService)
 # --------------------------------------------------
 @router.get("/priority/issues")
 def get_priority_issues(
@@ -50,7 +53,7 @@ def get_priority_issues(
     min_amount: float = Query(0, ge=0, description="Minimum invoice amount"),
 ):
     """
-    Fetch top priority issues based on filters.
+    Fetch top priority issues using service-based logic.
     """
     issues = PriorityService.get_priority_issues(
         limit=limit,

@@ -82,23 +82,16 @@ class ERPNextClient:
             return []
 
     # --------------------------------------------------
-    # Get OVERDUE invoices – sorted by PRIORITY then AMOUNT
+    # Get OVERDUE invoices – raw data only, NO priority sorting
+    # Priority is calculated by PriorityService only
     # --------------------------------------------------
     def get_overdue_invoices(self) -> List[Invoice]:
-        PRIORITY_ORDER = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
-
         if not self.base_url:
-            invoices = [
+            return [
                 Invoice("INV-001", "Test Corp", 100000, 45, date.today()),
                 Invoice("INV-002", "Demo Ltd", 50000, 30, date.today()),
                 Invoice("INV-003", "Sample Inc", 75000, 60, date.today()),
             ]
-
-            invoices.sort(
-                key=lambda x: (PRIORITY_ORDER[x.priority], x.amount),
-                reverse=True,
-            )
-            return invoices
 
         url = f"{self.base_url}/api/resource/Sales%20Invoice"
         today = date.today().isoformat()
@@ -137,11 +130,6 @@ class ERPNextClient:
                         if due_date_str else None,
                     )
                 )
-
-            invoices.sort(
-                key=lambda x: (PRIORITY_ORDER[x.priority], x.amount),
-                reverse=True,
-            )
 
             return invoices
 
