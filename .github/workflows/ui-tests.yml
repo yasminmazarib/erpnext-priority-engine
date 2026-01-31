@@ -27,6 +27,17 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps
 
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Start frontend server
+        working-directory: frontend
+        run: npm run start &
+
+      - name: Wait for frontend to be ready
+        run: npx wait-on http://localhost:3000
+
       - name: Run Playwright UI tests
         working-directory: frontend
         run: npx playwright test --config ui_tests/playwright.config.ts
