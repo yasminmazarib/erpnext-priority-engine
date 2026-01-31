@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from app.clients.erpnext_client import ERPNextClient
 from app.models.priority_models import PriorityIssue, Invoice
 
@@ -18,7 +20,13 @@ class PriorityService:
     }
 
     @staticmethod
-    def calculate_priority(invoice: Invoice) -> PriorityIssue:
+    def calculate_priority(
+        invoice: Optional[Invoice]
+    ) -> Optional[PriorityIssue]:
+        # ✅ guard clause – חשוב ל-QA ו-coverage
+        if invoice is None:
+            return None
+
         if invoice.days_overdue >= 7 or invoice.amount >= 10000:
             return PriorityIssue(
                 invoice.invoice_id,
@@ -49,20 +57,24 @@ class PriorityService:
         )
 
     @staticmethod
-    def get_top_issues(invoices: list) -> list:
+    def get_top_issues(invoices: List[Invoice]) -> List[PriorityIssue]:
         """
         Convert raw invoices to PriorityIssues and sort by priority + amount.
         This is the single source of truth for priority sorting.
         """
-        issues = [
-            PriorityService.calculate_priority(inv)
-            for inv in invoices
-        ]
+        if not invoices:
+            return []
+
+        issues = []
+        for inv in invoices:
+            issue = PriorityService.calculate_priority(inv)
+            if issue:
+                issues.append(issue)
 
         # Sort by priority order, then by amount (descending)
         issues.sort(
             key=lambda x: (
-                PriorityService.PRIORITY_ORDER[x.priority],
+                PriorityService.PRIORITY_ORDER.get(x.priority, 99),
                 -x.amount
             )
         )
@@ -70,13 +82,17 @@ class PriorityService:
         return issues
 
     @staticmethod
-    def get_priority_issues(limit=10, min_days=1, min_amount=0):
+    def get_priority_issues(
+        limit: int = 10,
+        min_days: int = 1,
+        min_amount: float = 0
+    ) -> List[PriorityIssue]:
         """Fetch and filter invoices, then calculate priorities."""
         if limit <= 0:
             raise ValueError("limit must be greater than zero")
 
         client = ERPNextClient()
-        invoices = client.get_overdue_invoices()
+        invoices = client.get_overdue_invoices() or []
 
         # Filter by min_days and min_amount
         filtered = [

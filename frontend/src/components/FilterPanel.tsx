@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { FilterParams } from '@/types';
 
 interface FilterPanelProps {
@@ -9,12 +10,12 @@ interface FilterPanelProps {
   isLoading: boolean;
 }
 
-export default function FilterPanel({
+const FilterPanel: React.FC<FilterPanelProps> = ({
   filters,
   onFiltersChange,
   onApply,
   isLoading,
-}: FilterPanelProps) {
+}) => {
   const handleChange = (key: keyof FilterParams, value: number) => {
     onFiltersChange({
       ...filters,
@@ -36,8 +37,10 @@ export default function FilterPanel({
             min={1}
             max={100}
             value={filters.limit}
-            onChange={(e) => handleChange('limit', parseInt(e.target.value, 10))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={(e) =>
+              handleChange('limit', parseInt(e.target.value, 10))
+            }
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
 
@@ -49,8 +52,10 @@ export default function FilterPanel({
             type="number"
             min={0}
             value={filters.min_days}
-            onChange={(e) => handleChange('min_days', parseInt(e.target.value, 10))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={(e) =>
+              handleChange('min_days', parseInt(e.target.value, 10))
+            }
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
 
@@ -63,8 +68,10 @@ export default function FilterPanel({
             min={0}
             step={100}
             value={filters.min_amount}
-            onChange={(e) => handleChange('min_amount', parseFloat(e.target.value))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={(e) =>
+              handleChange('min_amount', parseFloat(e.target.value))
+            }
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
       </div>
@@ -72,10 +79,13 @@ export default function FilterPanel({
       <button
         onClick={onApply}
         disabled={isLoading}
-        className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+        data-testid="apply-filters"
+        className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-400"
       >
         {isLoading ? 'Loading...' : 'Apply Filters'}
       </button>
     </div>
   );
-}
+};
+
+export default FilterPanel;

@@ -24,7 +24,10 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
 
   return (
     <div className="overflow-x-auto shadow-md rounded-lg">
-      <table className="w-full border-collapse bg-white">
+      <table
+        className="w-full border-collapse bg-white"
+        data-testid="invoice-table"
+      >
         <thead>
           <tr className="bg-gray-100 border-b-2 border-gray-300">
             <th className="px-6 py-4 text-left font-semibold text-gray-700">

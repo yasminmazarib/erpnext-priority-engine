@@ -1,0 +1,32 @@
+name: UI Tests (Playwright)
+
+on:
+  push:
+    branches: [ "main", "feature/testing-ci" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright UI tests
+        working-directory: frontend
+        run: npx playwright test --config ui_tests/playwright.config.ts

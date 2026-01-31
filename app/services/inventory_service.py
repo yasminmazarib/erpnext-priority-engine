@@ -11,7 +11,9 @@ class InventoryService:
     }
 
     @staticmethod
-    def _to_inventory_bin(raw: Union[InventoryBin, Dict[str, Any]]) -> Optional[InventoryBin]:
+    def _to_inventory_bin(
+        raw: Union[InventoryBin, Dict[str, Any]]
+    ) -> Optional[InventoryBin]:
         """
         ERPNext מחזיר dict.
         הפונקציה הזו ממירה dict -> InventoryBin.
@@ -34,8 +36,6 @@ class InventoryService:
         actual_qty = float(raw.get("actual_qty") or 0)
         reserved_qty = float(raw.get("reserved_qty") or 0)
 
-        # אם המודל שלך כולל שדות נוספים (projected/ordered/indented)
-        # אפשר להעביר אותם כאן גם, אבל לא חובה ללוגיקה הנוכחית
         return InventoryBin(
             item_code=item_code,
             warehouse=warehouse,
@@ -44,7 +44,13 @@ class InventoryService:
         )
 
     @staticmethod
-    def calculate_priority(bin_obj: InventoryBin) -> Optional[InventoryIssue]:
+    def calculate_priority(
+        bin_obj: Optional[InventoryBin]
+    ) -> Optional[InventoryIssue]:
+        # ✅ guard clause – חשוב ל-QA ו-coverage
+        if bin_obj is None:
+            return None
+
         qty = float(bin_obj.actual_qty or 0)
 
         if qty >= 200:
@@ -94,4 +100,5 @@ class InventoryService:
             reverse=True
         )
 
-        return issues[:limit]
+        # ❗ תיקון חשוב – מחזירים list, לא tuple
+        return issues[:limit]  

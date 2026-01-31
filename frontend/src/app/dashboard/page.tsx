@@ -36,7 +36,7 @@ export default function DashboardPage() {
       });
 
       const response = await fetch(
-        `${API_BASE_URL}/priority/invoices?${queryParams.toString()}`,
+        `${API_BASE_URL}/priority/issues?${queryParams.toString()}`,
         {
           method: 'GET',
           headers: {
@@ -53,7 +53,7 @@ export default function DashboardPage() {
       }
 
       const data = await response.json();
-      setIssues(data.invoices || []);
+      setIssues(data.top_issues || []);
     } catch (err) {
       console.error('Fetch error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data. Please try again.';
