@@ -12,8 +12,9 @@ export class DashboardPage {
   }
 
   async open() {
-    // משתמש ב-baseURL מה-playwright.config.ts
-    await this.page.goto('/dashboard');
+    // ❌ לא localhost
+    // ✅ דף יחסי
+    await this.page.goto('/');
   }
 
   async applyFilters() {
