@@ -16,3 +16,9 @@ __pycache__/
 # OS / Editor
 .vscode/
 .DS_Store
+
+node_modules/
+test-results/
+.last-run.json
+*.pyc
+.coverage
