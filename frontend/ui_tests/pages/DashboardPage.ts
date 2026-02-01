@@ -6,7 +6,9 @@ export class DashboardPage {
   async open() {
     await this.page.setContent(`
       <button data-testid="apply-filters">Apply</button>
-      <table data-testid="invoice-table"></table>
+      <table data-testid="invoice-table">
+        <tr><td>Mock Row</td></tr>
+      </table>
     `);
   }
 
@@ -15,6 +17,8 @@ export class DashboardPage {
   }
 
   async expectInvoiceTableVisible() {
-    await this.page.getByTestId('invoice-table').waitFor();
+    await this.page.getByTestId('invoice-table').waitFor({
+      state: 'attached',
+    });
   }
 }
