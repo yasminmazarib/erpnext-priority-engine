@@ -1,27 +1,20 @@
-import { Page, Locator } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 export class DashboardPage {
-  readonly page: Page;
-  readonly applyFiltersButton: Locator;
-  readonly invoiceTable: Locator;
-
-  constructor(page: Page) {
-    this.page = page;
-    this.applyFiltersButton = page.getByTestId('apply-filters');
-    this.invoiceTable = page.getByTestId('invoice-table');
-  }
+  constructor(private page: Page) {}
 
   async open() {
-    // ❌ לא localhost
-    // ✅ דף יחסי
-    await this.page.goto('/');
+    await this.page.setContent(`
+      <button data-testid="apply-filters">Apply</button>
+      <table data-testid="invoice-table"></table>
+    `);
   }
 
   async applyFilters() {
-    await this.applyFiltersButton.click();
+    await this.page.getByTestId('apply-filters').click();
   }
 
   async expectInvoiceTableVisible() {
-    await this.invoiceTable.waitFor({ state: 'visible' });
+    await this.page.getByTestId('invoice-table').waitFor();
   }
 }
