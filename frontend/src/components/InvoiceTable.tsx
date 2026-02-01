@@ -7,7 +7,11 @@ interface InvoiceTableProps {
   data: PriorityIssue[];
 }
 
-const priorityColors: Record<string, string> = {
+// 🔹 טיפוס ברור לערכי Priority
+type PriorityLevel = 'HIGH' | 'MEDIUM' | 'LOW';
+
+// 🔹 מיפוי צבעים עם טיפוס חזק (Type-safe)
+const priorityColors: Record<PriorityLevel, string> = {
   HIGH: 'bg-red-100 text-red-700',
   MEDIUM: 'bg-orange-100 text-orange-700',
   LOW: 'bg-green-100 text-green-700',
@@ -77,7 +81,8 @@ export default function InvoiceTable({ data }: InvoiceTableProps) {
               <td className="px-6 py-4 text-center">
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    priorityColors[issue.priority] ?? 'bg-gray-100 text-gray-700'
+                    priorityColors[issue.priority as PriorityLevel] ??
+                    'bg-gray-100 text-gray-700'
                   }`}
                 >
                   {issue.priority}
