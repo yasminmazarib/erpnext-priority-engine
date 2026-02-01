@@ -1,25 +1,15 @@
-import { Page, Locator } from '@playwright/test';
-
 export class DashboardPage {
-  readonly page: Page;
-  readonly applyFiltersButton: Locator;
-  readonly invoiceTable: Locator;
-
-  constructor(page: Page) {
-    this.page = page;
-    this.applyFiltersButton = page.getByTestId('apply-filters');
-    this.invoiceTable = page.getByTestId('invoice-table');
-  }
+  constructor(private page: Page) {}
 
   async open() {
     await this.page.goto('http://localhost:3000/dashboard');
   }
 
-  async clickApplyFilters() {
-    await this.applyFiltersButton.click();
+  async applyFilters() {
+    await this.page.getByTestId('apply-filters').click();
   }
 
-  async expectInvoiceTableVisible() {
-    await this.invoiceTable.waitFor({ state: 'visible' });
+  async isInvoiceTableVisible() {
+    await this.page.getByTestId('invoice-table').waitFor();
   }
 }

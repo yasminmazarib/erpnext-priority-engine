@@ -1,15 +1,10 @@
 import { test } from '@playwright/test';
 import { DashboardPage } from '../pages/DashboardPage';
 
-test('E2E user journey – dashboard shows invoice table', async ({ page }) => {
+test('E2E – user applies filters and sees results', async ({ page }) => {
   const dashboard = new DashboardPage(page);
 
-  // Step 1: Open dashboard
   await dashboard.open();
-
-  // Step 2: Click Apply Filters (user action)
-  await dashboard.clickApplyFilters();
-
-  // Step 3: Verify invoice table is visible
-  await dashboard.expectInvoiceTableVisible();
+  await dashboard.applyFilters();          // ← FEATURE
+  await dashboard.isInvoiceTableVisible(); // ← תוצאה
 });
