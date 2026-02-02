@@ -51,6 +51,7 @@ jobs:
         working-directory: frontend
         run: npm install
 
+
       - name: Install Playwright browsers
         working-directory: frontend
         run: npx playwright install --with-deps
