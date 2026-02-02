@@ -1,8 +1,18 @@
-import { APIResponse, FilterParams, InventoryAPIResponse, InventoryFilterParams } from '@/types';
+import {
+  FilterParams,
+  InventoryFilterParams,
+  APIResponse,
+  InventoryAPIResponse,
+} from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function fetchPriorityIssues(params: FilterParams): Promise<APIResponse> {
+/* =========================
+   PRIORITY (Invoices)
+========================= */
+export async function fetchPriorityIssues(
+  params: FilterParams
+): Promise<APIResponse> {
   const queryParams = new URLSearchParams({
     limit: params.limit.toString(),
     min_days: params.min_days.toString(),
@@ -10,42 +20,32 @@ export async function fetchPriorityIssues(params: FilterParams): Promise<APIResp
   });
 
   const response = await fetch(
-    `${API_BASE_URL}/priority/issues?${queryParams.toString()}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
+    `${API_BASE_URL}/priority/issues?${queryParams.toString()}`
   );
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.statusText}`);
+    throw new Error('Failed to fetch priority issues');
   }
 
   return response.json();
 }
 
-export async function fetchInventoryIssues(params: InventoryFilterParams): Promise<InventoryAPIResponse> {
+/* =========================
+   INVENTORY
+========================= */
+export async function fetchInventoryIssues(
+  params: InventoryFilterParams
+): Promise<InventoryAPIResponse> {
   const queryParams = new URLSearchParams({
     limit: params.limit.toString(),
   });
 
   const response = await fetch(
-    `${API_BASE_URL}/inventory/issues?${queryParams.toString()}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors',
-      credentials: 'omit',
-    }
+    `${API_BASE_URL}/inventory/issues?${queryParams.toString()}`
   );
 
   if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(`API Error ${response.status}: ${errorData || response.statusText}`);
+    throw new Error('Failed to fetch inventory issues');
   }
 
   return response.json();

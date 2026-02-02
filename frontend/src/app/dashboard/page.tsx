@@ -6,8 +6,7 @@ import InvoiceTable from '@/components/InvoiceTable';
 import AmountChart from '@/components/AmountChart';
 import { PriorityIssue, FilterParams } from '@/types';
 import { formatCurrency } from '@/lib/formatters';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+import { fetchPriorityIssues } from '@/lib/api';
 
 export default function DashboardPage() {
   const [issues, setIssues] = useState<PriorityIssue[]>([]);
@@ -30,34 +29,25 @@ export default function DashboardPage() {
   const loadData = async () => {
     setIsLoading(true);
     setError(null);
+
     try {
-      const queryParams = new URLSearchParams({
-        limit: filters.limit.toString(),
-      });
+      const data = await fetchPriorityIssues(filters);
 
-      const response = await fetch(
-        `${API_BASE_URL}/priority/issues?${queryParams.toString()}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          mode: 'cors',
-          credentials: 'omit',
-        }
-      );
+      // ✅ תמיכה גם ב-issues וגם ב-top_issues (מה-Backend שלך)
+      const safeIssues: PriorityIssue[] = Array.isArray((data as any)?.issues)
+        ? (data as any).issues
+        : Array.isArray((data as any)?.top_issues)
+        ? (data as any).top_issues
+        : [];
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`API Error ${response.status}: ${errorData || response.statusText}`);
-      }
-
-      const data = await response.json();
-      setIssues(data.top_issues || []);
+      setIssues(safeIssues);
     } catch (err) {
       console.error('Fetch error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data. Please try again.';
-      setError(errorMessage);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to fetch data. Please try again.'
+      );
       setIssues([]);
     } finally {
       setIsLoading(false);
@@ -103,6 +93,7 @@ export default function DashboardPage() {
 
           {!isLoading && !error && (
             <>
+              {/* ===== Summary ===== */}
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Summary
@@ -118,13 +109,17 @@ export default function DashboardPage() {
                     <p className="text-gray-600 text-sm">Total Amount</p>
                     <p className="text-3xl font-bold text-gray-900">
                       {formatCurrency(
-                        issues.reduce((sum, issue) => sum + issue.amount, 0)
+                        issues.reduce(
+                          (sum, issue) => sum + issue.amount,
+                          0
+                        )
                       )}
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* ===== Chart ===== */}
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Invoice Amounts by Customer
@@ -134,6 +129,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {/* ===== Table ===== */}
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-gray-900">
                   Overdue Invoices
@@ -149,4 +145,3 @@ export default function DashboardPage() {
     </main>
   );
 }
-

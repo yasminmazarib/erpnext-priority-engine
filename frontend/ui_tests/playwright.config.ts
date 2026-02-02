@@ -4,7 +4,8 @@ export default defineConfig({
   testDir: './tests',
   timeout: 30_000,
   use: {
-    baseURL: 'http://localhost:3000', // לא באמת חייב להיות רץ
+    // ✅ CI / Local friendly
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
     headless: true,
   },
 });
