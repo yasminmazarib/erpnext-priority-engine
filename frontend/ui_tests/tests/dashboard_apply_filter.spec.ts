@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import { DashboardPage } from '../pages/DashboardPage';
 
-test('E2E User Journey – Apply Filters shows invoice table', async ({ page }) => {
+test('Dashboard – Apply Filter displays invoice table', async ({ page }) => {
 
   // 🔹 Mock API response
   await page.route('**/priority/issues**', route => {
@@ -11,26 +11,25 @@ test('E2E User Journey – Apply Filters shows invoice table', async ({ page }) 
       body: JSON.stringify({
         top_issues: [
           {
-            invoice_id: 'INV-001',
-            customer: 'Mock Customer Ltd',
-            amount: 1200,
-            days_overdue: 7,
-            priority: 'HIGH'
+            invoice_id: 'INV-002',
+            customer: 'Filter Test Customer',
+            amount: 800,
+            days_overdue: 3,
+            priority: 'MEDIUM'
           }
         ]
       })
     });
   });
 
-  // 🔹 Page Object
   const dashboard = new DashboardPage(page);
 
   // Step 1: Open dashboard
   await dashboard.open();
 
-  // Step 2: Apply filter feature
+  // Step 2: Apply filter
   await dashboard.clickApplyFilters();
 
-  // Step 3: Validate results
+  // Step 3: Verify results
   await dashboard.expectInvoiceTableVisible();
 });
