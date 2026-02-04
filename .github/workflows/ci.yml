@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
 
+
 jobs:
   # ---------------- API UNIT / MOCK ----------------
   api-tests:
@@ -41,7 +42,7 @@ jobs:
           flags: api
           name: api-tests
           fail_ci_if_error: true
-          
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
