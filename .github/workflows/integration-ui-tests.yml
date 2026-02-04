@@ -12,10 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -25,24 +24,53 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run backend integration tests (may be skipped if no ERPNext)
+      - name: Run backend integration tests
         env:
           PYTHONPATH: .
           ERPNEXT_BASE_URL: ${{ secrets.ERPNEXT_BASE_URL }}
           ERPNEXT_API_KEY: ${{ secrets.ERPNEXT_API_KEY }}
           ERPNEXT_API_SECRET: ${{ secrets.ERPNEXT_API_SECRET }}
-        run: |
-          pytest backend/tests/api_integration_local -v
+        run: pytest backend/tests/api_integration_local -v
         continue-on-error: true
 
   ui-tests:
-    name: UI Tests (Playwright)
+    name: UI Tests (Playwright + Ngrok)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
+      # ---------- Backend ----------
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start backend (FastAPI)
+        env:
+          ERPNEXT_BASE_URL: ""
+        run: |
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+
+      # ---------- Ngrok ----------
+      - name: Install ngrok
+        run: npm install -g ngrok
+
+      - name: Configure ngrok
+        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start ngrok
+        run: |
+          ngrok http 8000 &
+          sleep 10
+
+      # ---------- Frontend ----------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -58,4 +86,6 @@ jobs:
 
       - name: Run Playwright UI tests
         working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
         run: npx playwright test
