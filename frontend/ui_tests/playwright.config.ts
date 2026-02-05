@@ -3,7 +3,7 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: './ui_tests/tests',
   timeout: 30_000,
 
   use: {
@@ -11,14 +11,5 @@ export default defineConfig({
     headless: true,
   },
 
-  // ✅ webServer תקין + TypeScript מרוצה
-  webServer: [
-    {
-      command: 'npm run dev',
-      url: 'http://localhost:3000',
-      reuseExistingServer: true,
-      timeout: 60_000,
-      cwd: '../', // ⬅️ חשוב: מפעיל את Next.js מתוך frontend
-    },
-  ],
+  // ❗ חשוב: אין webServer בכלל
 });
