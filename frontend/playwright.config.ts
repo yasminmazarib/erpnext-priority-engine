@@ -8,11 +8,4 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     headless: true,
   },
-
-  webServer: {
-    command: 'npm run build && npm run start',
-    port: 3000,
-    timeout: 120_000,
-    reuseExistingServer: !process.env.CI,
-  },
 });
