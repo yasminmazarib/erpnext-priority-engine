@@ -38,17 +38,17 @@ jobs:
         continue-on-error: true
 
   # ===============================
-  # UI Tests (Playwright)
+  # UI Tests (Playwright + NGROK)
   # ===============================
   ui-tests:
-    name: UI Tests (Playwright)
+    name: UI Tests (Playwright + Ngrok)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ---------- Backend ----------
+      # ---------- Python / Backend ----------
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -58,11 +58,29 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install playwright
 
       - name: Start backend (FastAPI)
         run: |
           uvicorn app.main:app --host 0.0.0.0 --port 8000 &
           sleep 5
+
+      # ---------- NGROK ----------
+      - name: Install ngrok
+        run: npm install -g ngrok
+
+      - name: Configure ngrok
+        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start ngrok (backend)
+        run: |
+          ngrok http 8000 --log=stdout > ngrok.log &
+          sleep 10
+
+      - name: Extract ngrok public URL
+        id: ngrok
+        run: |
+          echo "NGROK_URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.ngrok-free\.app' ngrok.log | head -n 1)" >> $GITHUB_ENV
 
       # ---------- Frontend ----------
       - name: Setup Node.js
@@ -89,5 +107,5 @@ jobs:
         working-directory: frontend
         env:
           BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+          NEXT_PUBLIC_API_BASE_URL: ${{ env.NGROK_URL }}
         run: npx playwright test
