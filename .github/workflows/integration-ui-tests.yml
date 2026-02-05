@@ -90,3 +90,9 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
         run: npx playwright test
 
+      # ---------- Upload Allure Results ----------
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
