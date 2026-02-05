@@ -5,7 +5,15 @@ import {
   InventoryAPIResponse,
 } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// ✅ שם משתנה תואם ל־.env.local
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+// 🛟 הגנה + דיבוג
+if (!API_BASE_URL) {
+  console.error(
+    '❌ NEXT_PUBLIC_API_BASE_URL is not defined. Check .env.local and restart dev server.'
+  );
+}
 
 /* =========================
    PRIORITY (Invoices)
@@ -19,12 +27,19 @@ export async function fetchPriorityIssues(
     min_amount: params.min_amount.toString(),
   });
 
+  console.log(
+    '📡 Fetching priority issues from:',
+    `${API_BASE_URL}/priority/issues?${queryParams.toString()}`
+  );
+
   const response = await fetch(
     `${API_BASE_URL}/priority/issues?${queryParams.toString()}`
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch priority issues');
+    throw new Error(
+      `Failed to fetch priority issues (status ${response.status})`
+    );
   }
 
   return response.json();
@@ -40,12 +55,19 @@ export async function fetchInventoryIssues(
     limit: params.limit.toString(),
   });
 
+  console.log(
+    '📡 Fetching inventory issues from:',
+    `${API_BASE_URL}/inventory/issues?${queryParams.toString()}`
+  );
+
   const response = await fetch(
     `${API_BASE_URL}/inventory/issues?${queryParams.toString()}`
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch inventory issues');
+    throw new Error(
+      `Failed to fetch inventory issues (status ${response.status})`
+    );
   }
 
   return response.json();
