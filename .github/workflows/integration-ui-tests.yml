@@ -8,14 +8,15 @@ on:
 
 jobs:
   # ===============================
-  # Backend Integration Tests
+  # Backend Integration Tests (REAL ERPNext)
   # ===============================
   backend-integration-tests:
     name: Backend Integration Tests (ERPNext)
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -36,6 +37,31 @@ jobs:
         run: pytest backend/tests/api_integration_local -v
         continue-on-error: true
 
+  # ===============================
+  # API Tests (MOCK)
+  # ===============================
+  api-mock-tests:
+    name: API Tests (Mock)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run API mock tests
+        env:
+          PYTHONPATH: .
+        run: pytest backend/tests/api -v
 
   # ===============================
   # UI Tests (Playwright + NGROK)
@@ -45,7 +71,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       # ---------- Backend ----------
       - name: Setup Python
@@ -93,14 +120,10 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps
 
-      - name: Build frontend
-        working-directory: frontend
-        run: npm run build
-
       - name: Start frontend (Next.js)
         working-directory: frontend
         run: |
-          npm run start &
+          npm run dev &
           sleep 10
 
       # ---------- Playwright ----------
