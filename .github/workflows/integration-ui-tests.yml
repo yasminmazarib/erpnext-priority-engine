@@ -95,6 +95,13 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
         run: npx playwright test
 
+      # ---------- ⬅️ NEW: Start Frontend (Next.js) ----------
+      - name: Start frontend (Next.js)
+        working-directory: frontend
+        run: |
+          npm run dev &
+          sleep 10
+
       # ---------- Pytest UI + Backend + Allure ----------
       - name: Run pytest tests with Allure
         env:
