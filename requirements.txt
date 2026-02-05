@@ -13,3 +13,6 @@ requests
 
 allure-pytest
 pytest-cov
+
+playwright
+pytest
