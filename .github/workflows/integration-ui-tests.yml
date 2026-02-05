@@ -36,7 +36,7 @@ jobs:
         continue-on-error: true
 
   ui-and-allure-tests:
-    name: UI Tests (Playwright Python + JS) + Allure
+    name: UI Tests (Playwright + Ngrok + Allure)
     runs-on: ubuntu-latest
 
     steps:
@@ -62,6 +62,18 @@ jobs:
         run: |
           uvicorn app.main:app --host 0.0.0.0 --port 8000 &
           sleep 5
+
+      # ---------- Ngrok ----------
+      - name: Install ngrok
+        run: npm install -g ngrok
+
+      - name: Configure ngrok
+        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start ngrok
+        run: |
+          ngrok http 8000 &
+          sleep 10
 
       # ---------- Node / Frontend ----------
       - name: Setup Node.js
