@@ -22,3 +22,9 @@ test-results/
 .last-run.json
 *.pyc
 .coverage
+
+# Allure results & reports
+allure-results/
+allure-report/
+**/allure-results/
+**/allure-report/
