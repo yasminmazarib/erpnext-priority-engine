@@ -8,7 +8,45 @@ on:
 
 jobs:
   # ===============================
-  # Backend Integration Tests (REAL ERPNext)
+  # API MOCK TESTS + COVERAGE
+  # ===============================
+  api-mock-tests:
+    name: API Tests (Mock + Codecov)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run API mock tests with coverage
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest backend/tests/api \
+            --cov=backend \
+            --cov-report=xml \
+            --cov-report=term
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: true
+
+
+  # ===============================
+  # BACKEND INTEGRATION TESTS
   # ===============================
   backend-integration-tests:
     name: Backend Integration Tests (ERPNext)
@@ -35,36 +73,10 @@ jobs:
           ERPNEXT_API_KEY: ${{ secrets.ERPNEXT_API_KEY }}
           ERPNEXT_API_SECRET: ${{ secrets.ERPNEXT_API_SECRET }}
         run: pytest backend/tests/api_integration_local -v
-        continue-on-error: true
+
 
   # ===============================
-  # API Tests (MOCK)
-  # ===============================
-  api-mock-tests:
-    name: API Tests (Mock)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install backend dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run API mock tests
-        env:
-          PYTHONPATH: .
-        run: pytest backend/tests/api -v
-
-  # ===============================
-  # UI Tests (Playwright + NGROK)
+  # UI TESTS (PLAYWRIGHT + NGROK)
   # ===============================
   ui-tests:
     name: UI Tests (Playwright + Ngrok)
@@ -90,7 +102,7 @@ jobs:
           uvicorn app.main:app --host 0.0.0.0 --port 8000 &
           sleep 5
 
-      # ---------- NGROK ----------
+      # ---------- Ngrok ----------
       - name: Install ngrok
         run: npm install -g ngrok
 
