@@ -1,0 +1,30 @@
+# Environment variables
+.env
+
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Test cache
+.pytest_cache/
+
+# OS / Editor
+.vscode/
+.DS_Store
+
+node_modules/
+test-results/
+.last-run.json
+*.pyc
+.coverage
+
+# Allure results & reports
+allure-results/
+allure-report/
+**/allure-results/
+**/allure-report/
